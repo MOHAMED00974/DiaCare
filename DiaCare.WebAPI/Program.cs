@@ -1,10 +1,11 @@
 
 using DiaCare.Infrastructure.Extensions;
+
 namespace DiaCare.WebAPI
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -26,12 +27,27 @@ namespace DiaCare.WebAPI
             }
 
             app.UseHttpsRedirection();
-
+            app.UseAuthentication();
             app.UseAuthorization();
-
+            
 
             app.MapControllers();
-
+            //Seed
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    
+                    await DiaCare.Infrastructure.Data.DataSeeder.SeedRolesAsync(services);
+                }
+                catch (Exception ex)
+                {
+                 
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while seeding the database.");
+                }
+            }
             app.Run();
         }
     }

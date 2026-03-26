@@ -9,6 +9,14 @@ namespace DiaCare.Domain.Interfaces
     public interface IBaseRepository<T> where T : class
     {
 
+        IQueryable<T> Query { get; } //  Include ^ Where 
+        Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+        Task<T> AddAsync(T item, CancellationToken cancellationToken = default);
+        Task AddRangeAsync(IEnumerable<T> values, CancellationToken cancellationToken = default);
+        void RemoveRange(IEnumerable<T> entities);
+        void Update(T item); 
+        void Delete(T item);
 
     }
 }
