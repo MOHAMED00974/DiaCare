@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DiaCare.Application.DTOS;
 using DiaCare.Domain.DTOS;
 using DiaCare.Domain.Entities;
 
@@ -10,6 +11,7 @@ namespace DiaCare.Application.Profiles
         {
             CreateMap<PredictionInputDto, HealthProfile>();
             CreateMap<PredictionResult, PredictionResultDto>().ReverseMap();
+            CreateMap<Article, ArticleDto>().ReverseMap();
         }
     }
 }

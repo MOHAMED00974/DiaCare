@@ -10,7 +10,7 @@ namespace DiaCare.WebAPI.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class PredictionController : ControllerBase
+    public class PredictionController : Controller
     {
         private readonly IPredictionService _predictionService;
         public PredictionController(IPredictionService predictionService)

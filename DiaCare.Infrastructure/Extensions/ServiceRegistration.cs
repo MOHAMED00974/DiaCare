@@ -75,10 +75,12 @@ namespace DiaCare.Infrastructure.Extensions
             // 4.  (Dependency Injection)
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IProfileServices, ProfileService>();
             services.AddScoped<IPredictionService, PredictionService>();
             services.AddScoped<IPredictionAdapter, PredictionAdapter>();
+            services.AddScoped<IArticleService, ArticleService>();
 
 
             // 5. General Setting

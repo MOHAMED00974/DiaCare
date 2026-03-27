@@ -11,7 +11,7 @@ using DiaCare.Application.Helpers;
 [Authorize] 
 [ApiController]
 [Route("api/[controller]")]
-public class ProfileController : ControllerBase
+public class ProfileController : Controller
 {
     private readonly IProfileServices _profileService; 
 

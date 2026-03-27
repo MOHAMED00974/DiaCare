@@ -11,7 +11,7 @@ namespace DiaCare.WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase // Handel Requst (No Logic(logic in service layer)
+    public class AuthController : Controller// Handel Requst (No Logic(logic in service layer)
     {
         private readonly IAuthService _authService;
 
