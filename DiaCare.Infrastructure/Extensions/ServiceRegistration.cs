@@ -14,6 +14,7 @@ using DiaCare.Application.Services;
 using DiaCare.Application.Helpers;
 using DiaCare.Application;
 using DiaCare.Application.Profiles;
+using DiaCare.Application.Adapters;
 
 
 namespace DiaCare.Infrastructure.Extensions
@@ -23,6 +24,8 @@ namespace DiaCare.Infrastructure.Extensions
         //Extension Method => Encapsulation
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            //FOR AI SERVICE
+            services.AddHttpClient();
 
             services.AddDbContext<AppDbContext>
                 (options =>
@@ -70,9 +73,13 @@ namespace DiaCare.Infrastructure.Extensions
             });
 
             // 4.  (Dependency Injection)
+
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IAuthService, AuthService>();
-            services.AddHttpClient();
+            services.AddScoped<IProfileServices, ProfileService>();
+            services.AddScoped<IPredictionService, PredictionService>();
+            services.AddScoped<IPredictionAdapter, PredictionAdapter>();
+
 
             // 5. General Setting
             services.Configure<JwtSettings>(configuration.GetSection("JWT"));

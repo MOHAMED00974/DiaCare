@@ -30,8 +30,8 @@ namespace DiaCare.WebAPI
             app.UseAuthentication();
             app.UseAuthorization();
             
-
             app.MapControllers();
+
             //Seed
             using (var scope = app.Services.CreateScope())
             {

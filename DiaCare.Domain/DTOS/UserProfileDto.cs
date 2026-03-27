@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace DiaCare.Domain.DTOS
 {
-    internal class UserProfileDto
+    public class UserProfileDto
     {
+        public string FullName { get; set; }
+        public int Age { get; set; }
+        public string Gender { get; set; }
     }
 }

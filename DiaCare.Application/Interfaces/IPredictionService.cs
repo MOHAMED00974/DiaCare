@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace DiaCare.Application.Interfaces
 {
-    public interface IProfileServices
+    public interface IPredictionService
     {
-      Task<UserProfileDto> GetProfileAsync(string userId);
+        Task<PredictionResultDto> PredictAsync(PredictionInputDto inputdto);
 
     }
 }

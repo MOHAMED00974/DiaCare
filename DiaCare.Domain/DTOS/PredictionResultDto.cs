@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace DiaCare.Domain.DTOS
 {
-    internal class PredictionResultDto
+    public  class PredictionResultDto
     {
+        public string RiskCategory { get; set; } // Medium
+        public double RiskScore { get; set; }    //  32.22
+
     }
 }

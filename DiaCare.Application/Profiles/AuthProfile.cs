@@ -14,6 +14,7 @@ namespace DiaCare.Application.Profiles
         public AuthProfile()
         {
             CreateMap<RegisterDto, ApplicationUser>().ReverseMap();
+            CreateMap<ApplicationUser, UserProfileDto>();
         }
     }
 }
