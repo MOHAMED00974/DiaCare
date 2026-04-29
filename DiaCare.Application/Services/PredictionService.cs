@@ -21,8 +21,6 @@ namespace DiaCare.Application.Services
         private readonly IPredictionAdapter _predictionAdapter;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper; // AutoMapper to handle object-to-object mapping.
-
-
         public PredictionService(HttpClient httpClient, IConfiguration configuration,
             IPredictionAdapter predictionAdapter,
             IUnitOfWork unitOfWork, IMapper mapper)
@@ -35,6 +33,78 @@ namespace DiaCare.Application.Services
                 _unitOfWork = unitOfWork;
                 _mapper = mapper; // add mapper to constructor
             }
+
+        /*  Refactoring 1 :: Long Method Smell  -> Apply Extract Method Refactoring
+         -------------------------------------------------------------------
+
+        //Before Refactoring :: All in one method
+
+       public async Task<PredictionResultDto> PredictAsync(PredictionInputDto inputdto, string? userId)
+       {
+           try
+           {
+               // 1. Map to AI  **********
+               var ClientAiRequest = _predictionAdapter.MapToAiRequest(inputdto);
+
+               // 2. Call AI    ************
+               var ModelReq = await _httpClient.PostAsJsonAsync(_baseUrl, ClientAiRequest);
+
+               if (!ModelReq.IsSuccessStatusCode)
+               {
+                   return new PredictionResultDto { RiskCategory = "AI Model Error" };
+               }
+
+               // 3. Read response  ********
+               var aiRawResponse = await ModelReq.Content.ReadFromJsonAsync<JsonElement>();
+
+               // 4. Map response  ********
+               var resultDto = _predictionAdapter.MapFromAiResponse(aiRawResponse);
+
+               // 5. Create HealthProfile  **********
+               var healthProfile = new HealthProfile
+               {
+                   UserId = userId,
+
+                   Bmi = inputdto.Bmi,
+                   BloodPressure = inputdto.BloodPressure,
+                   FastingGlucoseLevel = inputdto.FastingGlucoseLevel,
+                   InsulinLevel = inputdto.InsulinLevel,
+                   HbA1cLevel = inputdto.HbA1cLevel,
+                   CholesterolLevel = inputdto.CholesterolLevel,
+                   TriglyceridesLevel = inputdto.TriglyceridesLevel,
+                   PhysicalActivityLevel = inputdto.PhysicalActivityLevel,
+                   DailyCalorieIntake = inputdto.DailyCalorieIntake,
+                   SugarIntakeGramsPerDay = inputdto.SugarIntakeGramsPerDay,
+                   FamilyHistoryDiabetes = inputdto.FamilyHistoryDiabetes,
+                   WaistCircumferenceCm = inputdto.WaistCircumferenceCm,
+
+                   CreatedAt = DateTime.UtcNow
+               };
+
+                // 7. Save HealthProfile ***********
+                await _unitOfWork.HealthProfiles.AddAsync(healthProfile);
+
+                // 8. Create PredictionResult **********
+                var predictionRecord = new PredictionResult
+                {
+                    UserId = userId,
+                    HealthProfile = healthProfile, //  Navigation property
+                    RiskScore = resultDto.RiskScore,
+                    ResultText = resultDto.RiskCategory,
+                    Recommendation = "Please follow up with a specialist for further advice.",
+                    CreatedAt = DateTime.UtcNow
+                };
+                // 9. Save Prediction  ********
+                await _unitOfWork.PredictionResults.AddAsync(predictionRecord);
+                await _unitOfWork.SaveChangesAsync();
+
+                return resultDto;
+            }
+         */
+
+        //After Refactoring ::
+        //Extracted the database saving logic into a separate method SavePredictionDataAsync
+        //for better readability and maintainability.
         public async Task<PredictionResultDto> PredictAsync(PredictionInputDto inputdto, string? userId)
         {
             try
@@ -56,63 +126,73 @@ namespace DiaCare.Application.Services
                 // 4. Map response
                 var resultDto = _predictionAdapter.MapFromAiResponse(aiRawResponse);
 
-                // 5. UserId is passed in as a parameter (injected by the caller — e.g., Controller)
-
-                // 6. Create HealthProfile
-
-                /*
-                var healthProfile = new HealthProfile
-                {
-                    UserId = userId,
-
-                    Bmi = inputdto.Bmi,
-                    BloodPressure = inputdto.BloodPressure,
-                    FastingGlucoseLevel = inputdto.FastingGlucoseLevel,
-                    InsulinLevel = inputdto.InsulinLevel,
-                    HbA1cLevel = inputdto.HbA1cLevel,
-                    CholesterolLevel = inputdto.CholesterolLevel,
-                    TriglyceridesLevel = inputdto.TriglyceridesLevel,
-                    PhysicalActivityLevel = inputdto.PhysicalActivityLevel,
-                    DailyCalorieIntake = inputdto.DailyCalorieIntake,
-                    SugarIntakeGramsPerDay = inputdto.SugarIntakeGramsPerDay,
-                    FamilyHistoryDiabetes = inputdto.FamilyHistoryDiabetes,
-                    WaistCircumferenceCm = inputdto.WaistCircumferenceCm,
-
-                    CreatedAt = DateTime.UtcNow
-                };
-                */
-                // Using AutoMapper to map from inputdto to healthProfile
-                var healthProfile = _mapper.Map<HealthProfile>(inputdto);
-                healthProfile.UserId = userId;
-                healthProfile.CreatedAt = DateTime.UtcNow;
-
-                // 7. Save HealthProfile
-                await _unitOfWork.HealthProfiles.AddAsync(healthProfile);
-
-                // 8. Create PredictionResult
-                var predictionRecord = new PredictionResult
-                {
-                    UserId = userId,
-                    HealthProfile = healthProfile, //  Navigation property
-                    RiskScore = resultDto.RiskScore,
-                    ResultText = resultDto.RiskCategory,
-                    Recommendation = "Please follow up with a specialist for further advice.",
-                    CreatedAt = DateTime.UtcNow
-                };
-                // 9. Save Prediction
-                await _unitOfWork.PredictionResults.AddAsync(predictionRecord);
-                await _unitOfWork.SaveChangesAsync();
+                // 2. Apply Extract method
+                await SavePredictionDataAsync(inputdto, resultDto, userId);
 
                 return resultDto;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-
                 return new PredictionResultDto { RiskCategory = "Service unavailable" };
-                // to find error =>
-                //  return new PredictionResultDto { RiskCategory = $"Debug Error: {ex.Message}" };
             }
+        }
+
+        //  (The Extracted Method) --- Save in database 
+        private async Task SavePredictionDataAsync(PredictionInputDto inputdto, PredictionResultDto resultDto, string? userId)
+        {
+            /*
+               ------------  Refactoring 2 -> Type ( duplicated )
+               --------------------------------------------------------------
+
+            //Before 
+
+                var healthProfile = new HealthProfile
+              {
+                  UserId = userId,
+
+                  Bmi = inputdto.Bmi,
+                  BloodPressure = inputdto.BloodPressure,
+                  FastingGlucoseLevel = inputdto.FastingGlucoseLevel,
+                  InsulinLevel = inputdto.InsulinLevel,
+                  HbA1cLevel = inputdto.HbA1cLevel,
+                  CholesterolLevel = inputdto.CholesterolLevel,
+                  TriglyceridesLevel = inputdto.TriglyceridesLevel,
+                  PhysicalActivityLevel = inputdto.PhysicalActivityLevel,
+                  DailyCalorieIntake = inputdto.DailyCalorieIntake,
+                  SugarIntakeGramsPerDay = inputdto.SugarIntakeGramsPerDay,
+                  FamilyHistoryDiabetes = inputdto.FamilyHistoryDiabetes,
+                  WaistCircumferenceCm = inputdto.WaistCircumferenceCm,
+
+                  CreatedAt = DateTime.UtcNow
+              };
+            */
+
+            // After :: Using AutoMapper to map from inputdto to healthProfile
+            var healthProfile = _mapper.Map<HealthProfile>(inputdto);
+            healthProfile.UserId = userId;
+            healthProfile.CreatedAt = DateTime.UtcNow;
+
+            // 7. Save HealthProfile
+            await _unitOfWork.HealthProfiles.AddAsync(healthProfile);
+
+            // 8. Create PredictionResult
+            var predictionRecord = new PredictionResult
+            {
+                UserId = userId,
+                HealthProfile = healthProfile, 
+                RiskScore = resultDto.RiskScore,
+                ResultText = resultDto.RiskCategory,
+                Recommendation = "Please follow up with a specialist for further advice.",
+                CreatedAt = DateTime.UtcNow
+            };
+            // 9. Save Prediction
+            await _unitOfWork.PredictionResults.AddAsync(predictionRecord);
+            await _unitOfWork.SaveChangesAsync();
            
         }
     }
 }
+
+
+
+

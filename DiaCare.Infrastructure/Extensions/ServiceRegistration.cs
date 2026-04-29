@@ -81,11 +81,10 @@ namespace DiaCare.Infrastructure.Extensions
             services.AddScoped<IPredictionService, PredictionService>();
             services.AddScoped<IPredictionAdapter, PredictionAdapter>();
             services.AddScoped<IArticleService, ArticleService>();
-
-
+           services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             // 5. General Setting
             services.Configure<JwtSettings>(configuration.GetSection("JWT"));
-            services.AddAutoMapper(typeof(AuthProfile).Assembly);
+           
 
             services.AddHttpContextAccessor();
             services.AddDistributedMemoryCache();
