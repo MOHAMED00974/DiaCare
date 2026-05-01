@@ -10,6 +10,7 @@ using AutoMapper;
 using DiaCare.Application.Helpers;
 using DiaCare.Domain.Entities;
 using Microsoft.Extensions.Options;
+using DiaCare.Domain.Interfaces;
 
 namespace DiaCare.Application.Services
 {
@@ -17,8 +18,9 @@ namespace DiaCare.Application.Services
     {
         private UserManager<ApplicationUser> _userManager;
 
-        public ProfileService(UserManager<ApplicationUser> userManager, IMapper mapper)
-        {
+        public ProfileService(UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork, IMapper mapper)
+         : base(unitOfWork, mapper)
+        { 
             _userManager = userManager;
             _mapper = mapper;
         }

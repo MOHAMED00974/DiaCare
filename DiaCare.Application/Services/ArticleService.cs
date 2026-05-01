@@ -16,7 +16,8 @@ namespace DiaCare.Application.Services
     {
         private readonly IBaseRepository<Article> _baseRepository;
 
-        public ArticleService(IBaseRepository<Article> baseRepository, IUnitOfWork unitOfWork, IMapper mapper) 
+        public ArticleService(IBaseRepository<Article> baseRepository, IUnitOfWork unitOfWork, IMapper mapper)
+         : base(unitOfWork, mapper)
         {
             _baseRepository = baseRepository;
         }

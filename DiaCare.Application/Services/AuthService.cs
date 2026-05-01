@@ -19,9 +19,9 @@ namespace DiaCare.Application.Services
         private readonly JwtSettings _jwt;
 
         public AuthService(UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork, IMapper mapper, IOptions<JwtSettings> jwt)
+            : base(unitOfWork, mapper)
         {
             _userManager = userManager;
-            _mapper = mapper;
             _jwt = jwt.Value;
         }
 
