@@ -1,5 +1,5 @@
 # 🩺 DiaCare - Smart Support System for Diabetes Patients
-
+#lOOOOOOOOOOOOOOOL
 DiaCare is a smart healthcare system designed to support diabetes patients by tracking health data, predicting health risks using AI, and providing educational resources to improve lifestyle awareness.
 
 ---
